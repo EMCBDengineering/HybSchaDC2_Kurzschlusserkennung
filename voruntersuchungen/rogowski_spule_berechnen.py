@@ -1,38 +1,36 @@
-from sympy import Eq, symbols, solve, pi, nsimplify
-
+from sympy import Eq, symbols, solve, pi, nsimplify, Rational
+import sympy as sp
 
 mu_0 = symbols("mu_0")
 
 u, M, di_dt = symbols("u M di_dt")
 equation_u = Eq(u, M * di_dt)
 
-N, A, l_m = symbols("N A l_m")
-equation_M = Eq(M, mu_0*N*A/l_m)
+N, A, l_m, R_min, b = symbols("N A l_m R_min b")
+equation_M = Eq(M, mu_0*l_m/(2 * pi) * sp.log((R_min + b)/R_min))
 
-r_m = symbols("r_m")
-equation_l_m = Eq(l_m, 2 * pi * r_m)
-
-r_A = symbols("r_A")
-equation_A = Eq(A, pi*(r_A**2))
 
 # parameters
 values = {
-    di_dt : 10/(10**(-6)), # A/s
-    u : 5, # V
-    r_m : 5 * 10**(-2), # m
-    N : 300, # 1
-    mu_0 : 4 * pi * 10**(-7) # H/m
+    di_dt : 5 * 1/(10**(-6)), # A/s
+    u : 2, # V
+    N : 1, # 1
+    mu_0 : 4 * pi * 10**(-7), # H/m
+    R_min : Rational(1, 100), # m
+    b : Rational(10, 100) # m
 }
 
 result = solve(
-    [equation_u, equation_M, equation_l_m],
-    [M, A, l_m],
+    [equation_u, equation_M],
+    [M, l_m],
     dict=True
 )
 
 solutions = [
-    sol[A].subs(values)
+    sol[l_m].subs(values)
     for sol in result
 ]
 
-print([nsimplify(x) for x in solutions])
+print(result[0][l_m])
+
+print([x.evalf(4) for x in solutions])
